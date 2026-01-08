@@ -1,0 +1,48 @@
+#include <Servo.h>
+
+#define TRIG_PIN 9
+#define ECHO_PIN 8
+#define SERVO_PIN 6
+
+Servo servoMotor;
+
+void setup() {
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  
+  servoMotor.attach(SERVO_PIN);
+  servoMotor.write(0); // Posisi asal
+  
+  Serial.begin(9600);
+}
+
+void loop() {
+  long durasi;
+  int jarak;
+
+  // Hantar gelombang ultrasonik
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  // Terima pantulan
+  durasi = pulseIn(ECHO_PIN, HIGH);
+
+  // Kira jarak (cm)
+  jarak = durasi * 0.034 / 2;
+
+  Serial.print("Jarak: ");
+  Serial.print(jarak);
+  Serial.println(" cm");
+
+  // Jika objek kurang daripada 5 cm
+  if (jarak < 5) {
+    servoMotor.write(90); // Pusing 90 darjah
+  } else {
+    servoMotor.write(0);  // Kembali ke asal
+  }
+
+  delay(200);
+}
