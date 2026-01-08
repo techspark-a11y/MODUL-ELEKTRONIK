@@ -1,133 +1,16 @@
-#include <WiFi.h>
-#include <PubSubClient.h>
-#include <ESP32Servo.h>
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
+#define LED_PIN 13
+#define BUTTON_PIN 2
 
-// ======== PIN SETUP ========
-#define TRIG 27
-#define ECHO 26
-#define SERVO_PIN 14
-
-// ======== PERKARA SISTEM ========
-Servo servo;
-LiquidCrystal_I2C lcd(0x27, 16, 2);
-
-const char* ssid = "WIN WIFI";           // Ganti WiFi anda
-const char* password = "678678678";   // Ganti Password WiFi
-const char* mqtt_server = "broker.hivemq.com"; // Broker MQTT
-
-WiFiClient espClient;
-PubSubClient client(espClient);
-
-String mode = "AUTO"; // AUTO / MANUAL
-
-// ======== BACA JARAK ULTRASONIK ========
-long readDistance() {
-  digitalWrite(TRIG, LOW);
-  delayMicroseconds(2);
-  digitalWrite(TRIG, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIG, LOW);
-
-  long duration = pulseIn(ECHO, HIGH);
-  long distance = duration * 0.034 / 2; // dalam cm
-  return distance;
-}
-
-// ======== CALLBACK MQTT ========
-void callback(char* topic, byte* payload, unsigned int length) {
-  String msg = "";
-  for (int i = 0; i < length; i++) msg += (char)payload[i];
-
-  if (String(topic) == "tangki/mode") {
-    mode = msg; // AUTO / MANUAL
-  }
-
-  if (String(topic) == "tangki/servo/manual" && mode == "MANUAL") {
-    int angle = msg.toInt();
-    servo.write(angle);
-  }
-}
-
-// ======== HUBUNGAN WIFI & MQTT ========
 void setup() {
-  Serial.begin(115200);
-  pinMode(TRIG, OUTPUT);
-  pinMode(ECHO, INPUT);
-
-  servo.attach(SERVO_PIN);
-  servo.write(0); // servo mula di 0°
-
-  lcd.init();
-  lcd.backlight();
-
-  // Sambung WiFi
-  WiFi.begin(ssid, password);
-  Serial.print("Menyambung WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nWiFi Terhubung");
-
-  // Sambung MQTT
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP); // Butang menggunakan pull-up dalaman
 }
 
-// ======== RECONNECT MQTT ========
-void reconnect() {
-  while (!client.connected()) {
-    Serial.print("Menyambung MQTT...");
-    if (client.connect("ESP32_Tangki")) {
-      Serial.println("Terhubung");
-      client.subscribe("tangki/mode");
-      client.subscribe("tangki/servo/manual");
-    } else {
-      Serial.print("Gagal, rc=");
-      Serial.print(client.state());
-      delay(2000);
-    }
-  }
-}
-
-// ======== LOOP UTAMA ========
 void loop() {
-  if (!client.connected()) reconnect();
-  client.loop();
-
-  long jarak = readDistance(); // cm
-  String status = "";
-
-  // ===== LOGIK AUTO =====
-  if (mode == "AUTO") {
-    if (jarak > 5) { // >5 cm
-        servo.write(90);  // buka injap
-        status = "AIR RENDAH";
-    } else {
-        servo.write(0);   // tutup injap
-        status = "AIR PENUH";
-    }
-}
-
-
-  // ===== PAPARAN LCD =====
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Jarak: ");
-  lcd.print(jarak);
-  lcd.print("cm");
-
-  lcd.setCursor(0, 1);
-  if (mode == "AUTO") lcd.print(status);
-  else lcd.print("MANUAL");
-
-  // ===== HANTAR KE NODE-RED =====
-  client.publish("tangki/jarak", String(jarak).c_str());
-  client.publish("tangki/status", status.c_str());
-  client.publish("tangki/servo", String(servo.read()).c_str());
-  client.publish("tangki/mode/status", mode.c_str());
-
-  delay(2000);
+  // Butang ditekan = LOW
+  if (digitalRead(BUTTON_PIN) == LOW) {
+    digitalWrite(LED_PIN, HIGH);  // LED menyala
+  } else {
+    digitalWrite(LED_PIN, LOW);   // LED padam
+  }
 }
