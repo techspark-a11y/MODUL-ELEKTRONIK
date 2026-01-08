@@ -1,0 +1,16 @@
+#define LED_PIN 9        // Pin PWM
+#define SLIDER_PIN A0   // Input analog
+
+void setup() {
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+  int nilaiSlider = analogRead(SLIDER_PIN);  
+  // Bacaan analog: 0 – 1023
+
+  int kecerahan = map(nilaiSlider, 0, 1023, 0, 255);
+  // Tukar julat kepada PWM: 0 – 255
+
+  analogWrite(LED_PIN, kecerahan); 
+}
