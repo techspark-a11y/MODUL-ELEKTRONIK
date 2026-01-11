@@ -1,16 +1,29 @@
-#define LED_PIN 9        // Pin PWM
-#define SLIDER_PIN A0   // Input analog
+#define POT_PIN 33
+
+#define LED_MERAH 23
+#define LED_KUNING 17
+#define LED_HIJAU 19
 
 void setup() {
-  pinMode(LED_PIN, OUTPUT);
+  pinMode(LED_MERAH, OUTPUT);
+  pinMode(LED_KUNING, OUTPUT);
+  pinMode(LED_HIJAU, OUTPUT);
+
+  // LED MESTI bermula mati
+  analogWrite(LED_MERAH, 0);
+  analogWrite(LED_KUNING, 0);
+  analogWrite(LED_HIJAU, 0);
 }
 
 void loop() {
-  int nilaiSlider = analogRead(SLIDER_PIN);  
-  // Bacaan analog: 0 – 1023
+  int pot = analogRead(POT_PIN);   // 0 – 1023
 
-  int kecerahan = map(nilaiSlider, 0, 1023, 0, 255);
-  // Tukar julat kepada PWM: 0 – 255
+  // Pastikan: kanan = 0, kiri = 255
+  int pwm = constrain((pot - 50) * 255 / (1023 - 50), 0, 255);
 
-  analogWrite(LED_PIN, kecerahan); 
+  analogWrite(LED_MERAH, pwm);
+  analogWrite(LED_KUNING, pwm);
+  analogWrite(LED_HIJAU, pwm);
+
+  delay(30);
 }
