@@ -1,23 +1,24 @@
-#define LDR_PIN A0
-#define LED_PIN 13
+#define LDR_PIN 15
+#define LED_HIJAU 19
 
-int ambangGelap = 500; // Nilai ambang (boleh dilaras)
+int ambangCahaya = 500; // nilai ambang, boleh dilaras
 
 void setup() {
-  pinMode(LED_PIN, OUTPUT);
+  pinMode(LED_HIJAU, OUTPUT);
   Serial.begin(9600);
 }
 
 void loop() {
-  int bacaanLDR = analogRead(LDR_PIN); 
+  int bacaanLDR = analogRead(LDR_PIN); // baca nilai 0 – 1023
+  Serial.print("Nilai LDR: ");
   Serial.println(bacaanLDR);
 
-  // Jika gelap (nilai rendah), LED menyala
-  if (bacaanLDR < ambangGelap) {
-    digitalWrite(LED_PIN, HIGH);
+  // Jika cahaya cukup terang, LED hijau menyala
+  if (bacaanLDR > ambangCahaya) {
+    digitalWrite(LED_HIJAU, HIGH); 
   } else {
-    digitalWrite(LED_PIN, LOW);
+    digitalWrite(LED_HIJAU, LOW); 
   }
 
-  delay(200);
+  delay(100);
 }
