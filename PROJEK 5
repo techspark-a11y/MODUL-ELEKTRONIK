@@ -1,26 +1,26 @@
-#include <Servo.h>
+#include <ESP32Servo.h>
 
-#define TRIG_PIN 9
-#define ECHO_PIN 8
-#define SERVO_PIN 6
+#define TRIG_PIN 27
+#define ECHO_PIN 33
+#define SERVO_PIN 18
 
 Servo servoMotor;
 
 void setup() {
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
-  
+
   servoMotor.attach(SERVO_PIN);
-  servoMotor.write(0); // Posisi asal
-  
+  servoMotor.write(90);   // 90 = BERHENTI (servo 360°)
+
   Serial.begin(9600);
 }
 
 void loop() {
-  long durasi;
+  long duration;
   int jarak;
 
-  // Hantar gelombang ultrasonik
+  // Hantar denyutan ultrasonik
   digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
   digitalWrite(TRIG_PIN, HIGH);
@@ -28,20 +28,20 @@ void loop() {
   digitalWrite(TRIG_PIN, LOW);
 
   // Terima pantulan
-  durasi = pulseIn(ECHO_PIN, HIGH);
+  duration = pulseIn(ECHO_PIN, HIGH, 30000);
 
   // Kira jarak (cm)
-  jarak = durasi * 0.034 / 2;
+  jarak = duration * 0.034 / 2;
 
   Serial.print("Jarak: ");
   Serial.print(jarak);
   Serial.println(" cm");
 
-  // Jika objek kurang daripada 5 cm
-  if (jarak < 5) {
-    servoMotor.write(90); // Pusing 90 darjah
+  // KAWALAN SERVO
+  if (jarak > 0 && jarak < 5) {
+    servoMotor.write(60);   // Pusing satu arah
   } else {
-    servoMotor.write(0);  // Kembali ke asal
+    servoMotor.write(90);   // Berhenti
   }
 
   delay(200);
