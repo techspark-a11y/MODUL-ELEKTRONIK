@@ -1,40 +1,34 @@
-#define MQ2_PIN A0
-#define LED_MERAH 9
-#define LED_HIJAU 10
-#define BUZZER 8
-#define BUTTON_RESET 2
+#define MQ2_PIN 35
+#define LED_HIJAU 23
+#define LED_MERAH 19
 
-int ambangGas = 400;   // Nilai ambang gas (boleh dilaras)
-bool sistemAktif = false;
+int ambangGas = 100; // Tetapkan ikut kepekaan gas
 
 void setup() {
-  pinMode(LED_MERAH, OUTPUT);
   pinMode(LED_HIJAU, OUTPUT);
-  pinMode(BUZZER, OUTPUT);
-  pinMode(BUTTON_RESET, INPUT_PULLUP);
+  pinMode(LED_MERAH, OUTPUT);
 
-  digitalWrite(LED_HIJAU, HIGH);  // Keadaan selamat
+  // Keadaan awal: sistem selamat, hijau menyala
+  digitalWrite(LED_HIJAU, LOW);
+  digitalWrite(LED_MERAH, HIGH);
+
   Serial.begin(9600);
 }
 
 void loop() {
   int bacaanGas = analogRead(MQ2_PIN);
+  Serial.print("Bacaan MQ2: ");
   Serial.println(bacaanGas);
 
   // Jika gas berbahaya dikesan
-  if (bacaanGas > ambangGas && !sistemAktif) {
-    sistemAktif = true;
-    digitalWrite(LED_MERAH, HIGH);
-    digitalWrite(LED_HIJAU, LOW);
-    digitalWrite(BUZZER, HIGH);
+  if (bacaanGas > ambangGas) {
+    digitalWrite(LED_HIJAU, LOW);  // Hijau padam
+    digitalWrite(LED_MERAH, HIGH); // Merah menyala
+  } else {
+    // Normal: Hijau menyala, merah padam
+    digitalWrite(LED_HIJAU, HIGH);
+    digitalWrite(LED_MERAH, LOW);
   }
 
-  // Reset sistem menggunakan push button
-  if (digitalRead(BUTTON_RESET) == LOW) {
-    sistemAktif = false;
-    digitalWrite(LED_MERAH, LOW);
-    digitalWrite(LED_HIJAU, HIGH);
-    digitalWrite(BUZZER, LOW);
-    delay(300); // elak bouncing
-  }
+  delay(100);
 }
