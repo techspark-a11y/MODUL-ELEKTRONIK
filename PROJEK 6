@@ -1,0 +1,26 @@
+#define LED_HIJAU 19
+#define LED_MERAH 23
+#define BUTTON_PIN 15
+
+void setup() {
+  pinMode(LED_HIJAU, OUTPUT);
+  pinMode(LED_MERAH, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP); // butang dengan pull-up dalaman
+
+  // Keadaan awal
+  digitalWrite(LED_HIJAU, HIGH);
+  digitalWrite(LED_MERAH, LOW);
+}
+
+void loop() {
+  // Baca status butang
+  int statusButton = digitalRead(BUTTON_PIN);
+
+  if (statusButton == HIGH) { // Butang ditekan
+    digitalWrite(LED_HIJAU, LOW);   // Hijau padam
+    digitalWrite(LED_MERAH, HIGH);  // Merah menyala
+  } else { 
+    digitalWrite(LED_HIJAU, HIGH);  // Hijau menyala
+    digitalWrite(LED_MERAH, LOW);   // Merah padam
+  }
+}
