@@ -1,1 +1,59 @@
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+#include <UniversalTelegramBot.h>
+
+// WiFi
+const char* ssid = "NAMA_WIFI";
+const char* password = "PASSWORD_WIFI";
+
+// Telegram
+#define BOT_TOKEN "ISI_BOT_TOKEN"
+#define CHAT_ID "ISI_CHAT_ID"
+
+WiFiClientSecure client;
+UniversalTelegramBot bot(BOT_TOKEN, client);
+
+#define MQ2_PIN 34
+#define RED_PIN 26
+#define GREEN_PIN 25
+
+int gasThreshold = 300;
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(RED_PIN, OUTPUT);
+  pinMode(GREEN_PIN, OUTPUT);
+
+  digitalWrite(RED_PIN, LOW);
+  digitalWrite(GREEN_PIN, HIGH);
+
+  WiFi.begin(ssid, password);
+  client.setInsecure();  // penting untuk bypass SSL jika tiada cert
+
+  Serial.print("Connecting WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("Connected to WiFi");
+}
+
+void loop() {
+  int gasValue = analogRead(MQ2_PIN);
+  Serial.println(gasValue);
+
+  if (gasValue > gasThreshold) {
+    digitalWrite(RED_PIN, HIGH);
+    digitalWrite(GREEN_PIN, LOW);
+
+    String msg = "⚠️ Amaran! Gas berbahaya dikesan: " + String(gasValue);
+    bot.sendMessage(CHAT_ID, msg, "");
+  } else {
+    digitalWrite(RED_PIN, LOW);
+    digitalWrite(GREEN_PIN, HIGH);
+  }
+
+  delay(2000);
+}
 
