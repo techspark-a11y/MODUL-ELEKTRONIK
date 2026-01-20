@@ -1,1 +1,28 @@
- KAWALAN MOTOR DC MENGGUNAKAN POTENTIOMETER
+#include <ESP32Servo.h>
+
+#define SERVO_PIN 18
+#define POT_PIN 33
+
+Servo servoMotor;
+
+int stopValue = 90; // Nilai henti servo (mungkin perlu laras 88–92)
+
+void setup() {
+  servoMotor.attach(SERVO_PIN);
+}
+
+void loop() {
+  int potValue = analogRead(POT_PIN); // 0 – 1023
+
+  // Tukar nilai potentiometer kepada isyarat servo
+  int servoSpeed = map(potValue, 0, 1023, 0, 180);
+
+  // Hentikan servo jika hampir tengah
+  if (servoSpeed > (stopValue - 2) && servoSpeed < (stopValue + 2)) {
+    servoMotor.write(stopValue);
+  } else {
+    servoMotor.write(servoSpeed);
+  }
+
+  delay(20);
+}
